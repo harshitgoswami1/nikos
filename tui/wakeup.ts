@@ -7,7 +7,7 @@ import { runCliMode } from "../modes/cli";
 
 const BANNER_FONT = 'ANSI Shadow';
 const SHADOW = chalk.hex('#4ba67e');
-const FACE = chalk.hex('#ffffff').bold; 
+const FACE = chalk.hex('#a10000').bold; 
 
 function printBannerWithShadow(ascii: string) {
   const bannerLines = ascii.replace(/\s+$/, '').split('\n');
