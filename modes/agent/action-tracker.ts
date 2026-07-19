@@ -2,6 +2,7 @@
 import type { ActionLog, ActionStatus, ActionType } from './types';
 import { isMutationType } from './types';
 
+// ye ek exported class hai jiske kuch functions bhi hai 
 export class ActionTracker {
     // actions ek ActionLog (type) ke objects ka array hai
   private actions: ActionLog[] = [];
@@ -19,6 +20,7 @@ export class ActionTracker {
       timestamp?: Date;
     },
   ): ActionLog {
+    // log is a function of type ActionLog
     const action: ActionLog = {
       id: entry.id ?? `action_${this.actions.length}`,
       timestamp: entry.timestamp ?? new Date(),
@@ -46,7 +48,7 @@ export class ActionTracker {
   }
 
   updateStatus(id: string, status: ActionStatus, userApproved?: boolean): void {
-    // syntex for find array.find((item) => condition)
+    // syntax for find array.find((item) => condition)
     const a = this.actions.find((x) => x.id === id);
     if (!a) return;
     a.status = status;

@@ -23,16 +23,22 @@ const TEXT_EXT = new Set([
   '.txt',
 ]);
 
+/**
+ * ext - finds out the extension of the file
+ */
 function isProbablyTextFile(filePath: string): boolean {
   const ext = path.extname(filePath).toLowerCase();
   return TEXT_EXT.has(ext) || ext === '';
 }
 
+
+// this is the bridge between AI tools and Real file System
 export class ToolExecutor {
   private overlay = new Map<string, string>();
   private deleted = new Set<string>();
   private readonly norm = (rel: string) =>
     path.posix.normalize(rel.split(path.sep).join('/')).replace(/^\.\//, '');
+  // upar wala command path ko sahi se daalne ke liye use ho ta hai.
 
   constructor(
     private readonly tracker: ActionTracker,
@@ -49,9 +55,13 @@ export class ToolExecutor {
     return abs;
   }
 
+
+  // this checks if we have to exclude the file from the processing or not ?
   private excluded(relPath: string): boolean {
     const norm = this.norm(relPath);
     const segments = norm.split('/');
+    // "src/utils/file.ts" == ["src","utils,"file.ts"] (segment)
+    // base = file.ts
     const base = segments[segments.length - 1] ?? '';
 
     for (const pat of this.config.excludePatterns) {
@@ -64,11 +74,16 @@ export class ToolExecutor {
     return false;
   }
 
+
+  // accepts 2 things (rel = relative file path, op = operation name)
   private assertNotExcluded(rel: string, op: string): void {
+    // sabse pehle check karenge ki excluded toh nahi hai path.
     if (this.excluded(rel)) {
       throw new Error(`${op}: path is excluded by policy: ${rel}`);
     }
   }
+
+
 
   getEffectiveText(rel: string): string | undefined {
     const key = this.norm(rel);
@@ -78,6 +93,8 @@ export class ToolExecutor {
     if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) return undefined;
     return fs.readFileSync(abs, 'utf8');
   }
+
+
 
   readFile(rel: string): string {
     this.assertNotExcluded(rel, 'read_file');
@@ -99,6 +116,8 @@ export class ToolExecutor {
     return text;
   }
 
+
+
   createFile(rel: string, content: string): string {
     if (!this.config.tools.allowFileCreation) throw new Error('File creation disabled');
     this.assertNotExcluded(rel, 'create_file');
@@ -118,6 +137,8 @@ export class ToolExecutor {
     return `Staged new file: ${key}`;
   }
 
+
+
   modifyFile(rel: string, content: string): string {
     if (!this.config.tools.allowFileModification) throw new Error('File modification disabled');
     this.assertNotExcluded(rel, 'modify_file');
@@ -133,6 +154,7 @@ export class ToolExecutor {
     });
     return `Staged update: ${key}`;
   }
+
 
   deleteFile(rel: string): string {
     if (!this.config.tools.allowFileModification) throw new Error('File deletion disabled');
@@ -151,6 +173,8 @@ export class ToolExecutor {
     return `Staged delete: ${key}`;
   }
 
+
+
   createFolder(rel: string): string {
     if (!this.config.tools.allowFolderCreation) throw new Error('Folder creation disabled');
     this.assertNotExcluded(rel, 'create_folder');
@@ -163,6 +187,8 @@ export class ToolExecutor {
     });
     return `Staged folder: ${key}`;
   }
+
+
 
   listFiles(rel: string, recursive: boolean): string {
     this.assertNotExcluded(rel, 'list_files');
@@ -198,6 +224,8 @@ export class ToolExecutor {
     return out || '(empty)';
   }
 
+
+  
   searchFiles(rootRel: string, globPattern: string, contentQuery?: string): string {
     this.assertNotExcluded(rootRel, 'search_files');
     const rootAbs = this.resolveSafe(rootRel);
@@ -251,6 +279,8 @@ export class ToolExecutor {
     return out || '(no matches)';
   }
 
+
+
   analyzeCodebase(rootRel: string): string {
     const rootAbs = this.resolveSafe(rootRel);
     if (!fs.existsSync(rootAbs)) throw new Error(`analyze_codebase: not found: ${rootRel}`);
@@ -283,6 +313,8 @@ export class ToolExecutor {
     return summary;
   }
 
+
+
   queueShell(command: string): string {
     if (!this.config.tools.allowShellExecution) throw new Error('Shell execution disabled');
     this.tracker.log({
@@ -294,6 +326,8 @@ export class ToolExecutor {
     return `Shell queued: ${command}`;
   }
 
+
+
   skillRoots(): string[] {
     const extra =
       process.env.SKILLS_DIRS?.split(/[;]/).map((s) => s.trim()).filter(Boolean) ?? [];
@@ -303,6 +337,8 @@ export class ToolExecutor {
       path.join(homedir(), '.claude/skills'),
     ];
   }
+
+
 
   listSkills(): string {
     const lines: string[] = [];
@@ -327,6 +363,9 @@ export class ToolExecutor {
     return out || '(none)';
   }
 
+
+
+
   readSkill(skillPath: string): string {
     const abs = path.isAbsolute(skillPath)
       ? path.normalize(skillPath)
@@ -345,6 +384,8 @@ export class ToolExecutor {
     });
     return text;
   }
+
+
 
   applyApprovedFromTracker(): { errors: string[] } {
     const errors: string[] = [];
@@ -396,6 +437,7 @@ export class ToolExecutor {
 
     return { errors };
   }
+
 
   clearStaging(): void {
     this.overlay.clear();

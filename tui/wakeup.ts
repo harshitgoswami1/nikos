@@ -7,7 +7,7 @@ import { runCliMode } from "../modes/cli";
 
 const BANNER_FONT = 'ANSI Shadow';
 const SHADOW = chalk.hex('#4ba67e');
-const FACE = chalk.hex('#a10000').bold; 
+const FACE = chalk.hex('#ff0000').bold; 
 
 function printBannerWithShadow(ascii: string) {
   const bannerLines = ascii.replace(/\s+$/, '').split('\n');
@@ -35,6 +35,7 @@ export async function runWakeup() {
 
     printBannerWithShadow(ascii);
 
+    // select is a part of clack/prompts, it allows us to create a nice interactive menu in the terminal
     const mode = await select({
     message: 'Choose a Mode',
     options: [
