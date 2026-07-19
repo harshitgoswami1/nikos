@@ -2,6 +2,8 @@
 
 A terminal-native AI coding agent CLI. `nikos` runs an LLM tool-loop against your codebase — reading, searching, and staging file changes — and applies nothing until you review a diff and approve it.
 
+<img width="616" height="279" alt="image" src="https://github.com/user-attachments/assets/89eba9f3-a537-435a-8a90-4bb180107608" />
+
 Built with [Bun](https://bun.sh), the [Vercel AI SDK](https://sdk.vercel.ai) (`ToolLoopAgent`), and [OpenRouter](https://openrouter.ai) for model access.
 
 ## Features
